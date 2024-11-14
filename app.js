@@ -6,28 +6,31 @@ const dados = JSON.parse(fs.readFileSync('users3k.json', 'utf8'))
 
 const db = new sqlite3.Database('./banco.db')
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    email TEXT,
-    username TEXT,
-    age INTEGER,
-    country TEXT
-  )
-`)
+db.serialize(() => {
 
-const insert = db.prepare(`
-  INSERT INTO users (id, name, email, username, age, country)
-  VALUES (?, ?, ?, ?, ?, ?)
-`)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      email TEXT,
+      username TEXT,
+      age INTEGER,
+      country TEXT
+    )
+  `)
 
-dados.users.forEach(user => {
-  insert.run(user.id, user.name, user.email, user.username, user.age, user.country)
+  const insert = db.prepare(`
+    INSERT INTO users (id, name, email, username, age, country)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+
+  dados.users.forEach(user => {
+    insert.run(user.id, user.name, user.email, user.username, user.age, user.country)
+  })
+
+  insert.finalize(() => {
+    console.log("Dados inseridos com sucesso!")
+    db.close()
+  })
+
 })
-
-insert.finalize()
-
-console.log("Dados inseridos ")
-
-db.close()
