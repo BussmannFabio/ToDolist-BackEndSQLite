@@ -24,44 +24,42 @@ app.get('/users', (req, res) => {
 app.get('/users/search', (req, res) => {
   const {
     id, name, email, username, age, country,
-    id_maiorq, id_menorq, age_maiorq, age_menorq,
-    page = 1, limite = 5, sortBy = 'id', order = 'asc'
-  } = req.query
+    id_maiorq, id_menorq, age_maiorq, age_menorq, page = 1, limite = 5, sortBy = 'id', order = 'asc'
+  } = req.query;
 
-  let query = "SELECT * FROM users"
-  const conditions = []
+  let query = "SELECT * FROM users WHERE"
 
-  if (id) conditions.push(`id = ${id}`)
-  if (id_maiorq) conditions.push(`id > ${parseInt(id_maiorq)}`)
-  if (id_menorq) conditions.push(`id < ${parseInt(id_menorq)}`)
+  if (id) { query += ` id = ${id}`}
 
-  if (name) conditions.push(`LOWER(name) LIKE '%${name.toLowerCase()}%'`)
-  if (email) conditions.push(`LOWER(email) LIKE '%${email.toLowerCase()}%'`)
-  if (username) conditions.push(`LOWER(username) LIKE '%${username.toLowerCase()}%'`)
+  if (id_maiorq) { query += ` AND id > ${id_maiorq}`}
 
-  if (age) conditions.push(`age = ${parseInt(age)}`)
-  if (age_maiorq) conditions.push(`age > ${parseInt(age_maiorq)}`)
-  if (age_menorq) conditions.push(`age < ${parseInt(age_menorq)}`)
+  if (id_menorq) { query += ` AND id < ${id_menorq}`}
 
-  if (country) conditions.push(`LOWER(country) LIKE '%${country.toLowerCase()}%'`)
+  if (name) { query += ` AND name = '${name}'`}
 
-  if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ")
-  }
+  if (email) { query += ` AND email = '${email}'`}
+
+  if (username) { query += ` AND username = '${username}'`}
+
+  if (age) { query += ` AND age = ${parseInt(age)}`}
+
+  if (age_maiorq) { query += ` AND age > ${parseInt(age_maiorq)}`}
+
+  if (age_menorq) { query += ` AND age < ${parseInt(age_menorq)}`}
+
+  if (country) { query += ` AND country = '${country}'`}
 
   query += ` ORDER BY ${sortBy} ${order.toUpperCase()}`
-
+  
   const offset = (page - 1) * limite
   query += ` LIMIT ${limite} OFFSET ${offset}`
 
-  db.all(query, (err, rows) => {
-    if (err) {
-      console.log("err")
-    }
-    res.json(rows)
-  })
+  console.log(query)
+
+  res.send(query)
 })
 
-app.listen(port, () => {
+
+app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta: ${port}`)
 })
