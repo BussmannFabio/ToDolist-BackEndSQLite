@@ -30,8 +30,20 @@ app.get('/users/search', (req, res) => {
   let query = "SELECT * FROM users WHERE"
   let primeiraCondição = true
 
-  if ((id && (id_maiorq || id_menorq)) || (age && (age_maiorq || age_menorq))) {
-    return res.send("Impossível buscar por: id com id_maiorq/id_menorq ou age com age_maiorq/age_menorq")
+  if ((id && (id_maiorq))) {
+    return res.send("Impossível buscar por: id e id_maiorq!")
+  }
+
+  if ((id && (id_menorq))) {
+    return res.send("Impossível buscar por: id e id_menorq!")
+  }
+
+  if ((age && (age_maiorq))) {
+    return res.send("Impossível buscar por: age e age_maiorq")
+  }
+
+  if ((age && (age_menorq))) {
+    return res.send("Impossível buscar por: age e age_menorq")
   }
 
   const addCondition = (condition) => {
