@@ -28,29 +28,33 @@ app.get('/users/search', (req, res) => {
   } = req.query;
 
   let query = "SELECT * FROM users WHERE"
+  let primeiraCondição = true
 
-  if (id) { query += ` id = ${id}`}
+  const addCondition = (condition) => {
+    if (primeiraCondição) {
+      query += ` ${condition}`
+      primeiraCondição = false
+    } else {
+      query += ` AND ${condition}`
+    }
+  }
 
-  if (id_maiorq) { query += ` AND id > ${id_maiorq}`}
+  if (id) addCondition(`id = ${id}`);
+  if (id_maiorq) addCondition(`id > ${id_maiorq}`)
+  if (id_menorq) addCondition(`id < ${id_menorq}`)
 
-  if (id_menorq) { query += ` AND id < ${id_menorq}`}
+  if (name) addCondition(`name = '${name}'`)
+  if (email) addCondition(`email = '${email}'`)
+  if (username) addCondition(`username = '${username}'`)
 
-  if (name) { query += ` AND name = '${name}'`}
+  if (age) addCondition(`age = ${parseInt(age)}`)
+  if (age_maiorq) addCondition(`age > ${parseInt(age_maiorq)}`)
+  if (age_menorq) addCondition(`age < ${parseInt(age_menorq)}`)
 
-  if (email) { query += ` AND email = '${email}'`}
-
-  if (username) { query += ` AND username = '${username}'`}
-
-  if (age) { query += ` AND age = ${parseInt(age)}`}
-
-  if (age_maiorq) { query += ` AND age > ${parseInt(age_maiorq)}`}
-
-  if (age_menorq) { query += ` AND age < ${parseInt(age_menorq)}`}
-
-  if (country) { query += ` AND country = '${country}'`}
+  if (country) addCondition(`country = '${country}'`)
 
   query += ` ORDER BY ${sortBy} ${order.toUpperCase()}`
-  
+
   const offset = (page - 1) * limite
   query += ` LIMIT ${limite} OFFSET ${offset}`
 
