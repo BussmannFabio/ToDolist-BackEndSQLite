@@ -56,7 +56,7 @@ app.get('/users/search', (req, res) => {
 
   db.all(query, (err, rows) => {
     if (err) {
-      return res.status(500).json({ error: err.message })
+      console.log("err")
     }
     res.json(rows)
   })
