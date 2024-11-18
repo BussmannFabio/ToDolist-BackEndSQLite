@@ -31,19 +31,19 @@ app.get('/users/search', (req, res) => {
   let primeiraCondição = true
 
   if ((id && (id_maiorq))) {
-    return res.send("Impossível buscar por: id e id_maiorq!")
+    return res.status(500).send("Impossível buscar por: id e id_maiorq ao mesmo tempo!")
   }
 
   if ((id && (id_menorq))) {
-    return res.send("Impossível buscar por: id e id_menorq!")
+    return res.status(500).send("Impossível buscar por: id e id_menorq ao mesmo tempo!")
   }
 
   if ((age && (age_maiorq))) {
-    return res.send("Impossível buscar por: age e age_maiorq")
+    return res.status(500).send("Impossível buscar por: age e age_maiorq ao mesmo tempo!")
   }
 
   if ((age && (age_menorq))) {
-    return res.send("Impossível buscar por: age e age_menorq")
+    return res.status(500).send("Impossível buscar por: age e age_menorq ao mesmo tempo!")
   }
 
   const addCondition = (condition) => {
@@ -76,9 +76,13 @@ app.get('/users/search', (req, res) => {
 
   console.log(query)
 
-  res.send(query)
+  db.all(query, (err, rows) => {
+    if (err) {
+      return res.status(500).send("Erro ao executar a consulta!")
+    }
+    res.json(rows)
+  })
 })
-
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta: ${port}`)
