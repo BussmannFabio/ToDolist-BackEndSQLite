@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 app.get('/users', (req, res) => {
   db.all('SELECT * FROM users', [], (err, rows) => {
     if (err) {
-      console.log(err)
+      return res.status(500).send("Erro ao executar a consulta!")
     }
     res.json(rows)
   })
