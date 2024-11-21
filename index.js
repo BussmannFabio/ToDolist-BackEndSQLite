@@ -95,16 +95,18 @@ const createUser = (req, res) => {
       return res.status(500).json({ error: "Erro ao criar o usuário" })
     }
 
-    const maxIdQuery = `SELECT MAX(id) AS id_max FROM users`
+    const maxIdQuery = `SELECT MAX(id) AS max_id FROM users`
 
     db.get(maxIdQuery, (err, row) => {
       if (err) {
-        return res.status(500).json({ error: "Erro ao recuperar o ID do usuário" })
+        return res.status(500).json({ error: "Erro ao recuperar o maior ID" })
       }
+
+      const newId = row.max_id + 1
 
       res.status(201).json({
         message: 'Usuário criado com sucesso',
-        userId: row.id_max
+        userId: newId
       })
     })
   })
