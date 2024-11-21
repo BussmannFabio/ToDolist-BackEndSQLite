@@ -31,28 +31,28 @@ const validateUser = (req, res, next) => {
 }
 
 const createUser = (req, res) => {
-  const { name, age, email, country, username, registered_date } = req.body
+  const { name, age, email, country, username } = req.body
 
   const insertQuery = `
     INSERT INTO users (name, email, username, age, country, registered_date)
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, GETDATE())
   `
 
-  const params = [name, email, username, age, country, registered_date]
+  const params = [name, email, username, age, country]
 
-  db.run(insertQuery, params, (err) => {
+  db.run(insertQuery, params, function (err) {
     if (err)
-      return res.status(500).json({ error: "ERro ao criar o usuario" })
+      return res.status(500).json({ error: "Erro ao criar o usuário" })
 
-    const countQuery = `SELECT COUNT(*) AS total FROM users`
+    const maxIdQuery = `SELECT MAX(id) AS id_max FROM users`
 
-    db.get(countQuery, (err, row) => {
+    db.get(maxIdQuery, (err, row) => {
       if (err)
-        return res.status(500).json({ error: "error" })
+        return res.status(500).json({ error: "ERRo" })
 
       res.status(201).json({
         message: 'Usuário criado com sucesso',
-        userId: row.total,
+        userId: row.id_max,
       })
     })
   })
