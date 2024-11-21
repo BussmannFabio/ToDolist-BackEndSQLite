@@ -64,20 +64,20 @@ app.use(express.json())
 const validateUser = (req, res, next) => {
   const { name, email, age, country, username } = req.body
 
-    if (!name || typeof name !== 'string' || !name.trim().includes(' '))
-      return res.status(500).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
-    
-    if (!age || isNaN(age) || age < 8 || age > 120)
-      return res.status(500).json({ error: "Idade inválida. A idade deve ser um número entre 8 e 120 anos" })
-   
-    if (!username || typeof username !== 'string' || username.length < 6)
-      return res.status(500).json({ error: "Username inválido. Deve ser uma string com pelo menos 6 caracteres" })
-   
-    if (email && typeof email !== 'string')
-      return res.status(500).json({ error: "Email inválido" })
-   
-    if (country && typeof country !== 'string')
-      return res.status(500).json({ error: "País inválido" })
+  if (!name || typeof name !== 'string' || !name.trim().includes(' '))
+    return res.status(400).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
+
+  if (!age || isNaN(age) || age < 8 || age > 120)
+    return res.status(400).json({ error: "Idade inválida. A idade deve ser um número entre 8 e 120 anos" })
+
+  if (!username || typeof username !== 'string' || username.length < 6)
+    return res.status(400).json({ error: "Username inválido. Deve ser uma string com pelo menos 6 caracteres" })
+
+  if (email && typeof email !== 'string')
+    return res.status(400).json({ error: "Email inválido" })
+
+  if (country && typeof country !== 'string')
+    return res.status(400).json({ error: "País inválido" })
 
   next()
 }
@@ -87,24 +87,24 @@ const createUser = (req, res) => {
 
   const insertQuery = `
     INSERT INTO users (name, email, username, age, country, registered_date)
-    VALUES (?, ?, ?, ?, ?, GETDATE())
+    VALUES ('${name}', '${email}', '${username}', ${age}, '${country}', GETDATE())
   `
 
-  const params = [name, email, username, age, country]
-
-  db.run(insertQuery, params, function (err) {
-    if (err)
+  db.run(insertQuery, function (err) {
+    if (err) {
       return res.status(500).json({ error: "Erro ao criar o usuário" })
+    }
 
     const maxIdQuery = `SELECT MAX(id) AS id_max FROM users`
 
     db.get(maxIdQuery, (err, row) => {
-      if (err)
-        return res.status(500).json({ error: "ERRo" })
+      if (err) {
+        return res.status(500).json({ error: "Erro ao recuperar o ID do usuário" })
+      }
 
       res.status(201).json({
         message: 'Usuário criado com sucesso',
-        userId: row.id_max,
+        userId: row.id_max
       })
     })
   })
