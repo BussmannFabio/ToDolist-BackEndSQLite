@@ -54,13 +54,13 @@ const executeQuery = (req, res) => {
   query += ` LIMIT ${limite} OFFSET ${offset}`
 
   db.all(query, (err, rows) => {
-
     if (err) return res.status(500).send("Erro ao executar a consulta!")
     res.json(rows)
   })
 }
 
 app.use(express.json())
+
 const validateUser = (req, res, next) => {
   const { name, email, age, country, username } = req.body
 
@@ -83,33 +83,37 @@ const validateUser = (req, res, next) => {
 }
 
 const createUser = (req, res) => {
-  const { name, email, age, username, country} = req.body
+  const { name, email, age, username, country } = req.body
 
-  const insertQuery = `
-    INSERT INTO users (name, email, username, age, country, registered_date)
-    VALUES ('${name}', '${email}', '${username}', ${age}, '${country}', GETDATE())
-  `
+  const getNextIdQuery = `SELECT MAX(id) AS max_id FROM users`
 
-  db.run(insertQuery, function (err) {
+  db.get(getNextIdQuery, (err, row) => {
     if (err) {
-      return res.status(500).json({ error: "Erro ao criar o usuário" })}
+      return res.status(500).json({ error: "Erro ao recuperar o maior ID" })
+    }
 
-    const maxIdQuery = `SELECT MAX(id) AS max_id FROM users`
+    const newId = row.max_id + 1
+    const registeredDate = new Date().toISOString().split('T')[0]
 
-    db.get(maxIdQuery, (err, row) => {
+    const insertQuery = `
+      INSERT INTO users (id, name, email, username, age, country, registered_date)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `
+
+    db.run(insertQuery, [newId, name, email, username, age, country, registeredDate], function (err) {
       if (err) {
-        return res.status(500).json({ error: "Erro ao recuperar o maior ID"})
+        return res.status(500).json({ error: "Erro ao criar o usuário" })
       }
-
-      const newId = row.max_id + 1
 
       res.status(200).json({
         message: 'Usuário criado com sucesso',
-        userId: newId
+        userId: newId,
+        registeredDate: registeredDate
       })
     })
   })
 }
+
 
 app.get('/', helloDev)
 app.get('/users', users)
