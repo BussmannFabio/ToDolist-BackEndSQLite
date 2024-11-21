@@ -83,7 +83,7 @@ const validateUser = (req, res, next) => {
 }
 
 const createUser = (req, res) => {
-  const { name, age, email, country, username } = req.body
+  const { name, email, age, username, country} = req.body
 
   const insertQuery = `
     INSERT INTO users (name, email, username, age, country, registered_date)
@@ -92,19 +92,18 @@ const createUser = (req, res) => {
 
   db.run(insertQuery, function (err) {
     if (err) {
-      return res.status(500).json({ error: "Erro ao criar o usuário" })
-    }
+      return res.status(500).json({ error: "Erro ao criar o usuário" })}
 
     const maxIdQuery = `SELECT MAX(id) AS max_id FROM users`
 
     db.get(maxIdQuery, (err, row) => {
       if (err) {
-        return res.status(500).json({ error: "Erro ao recuperar o maior ID" })
+        return res.status(500).json({ error: "Erro ao recuperar o maior ID"})
       }
 
       const newId = row.max_id + 1
 
-      res.status(201).json({
+      res.status(200).json({
         message: 'Usuário criado com sucesso',
         userId: newId
       })
