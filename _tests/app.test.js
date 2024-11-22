@@ -63,98 +63,94 @@ describe('Testando rota GET /users/search', () => {
   describe('Testando rota POST /users', () => {
   
     it('Deve retornar 200 e cadastrar o usuário', async () => {
-        const newUser = {
-          name: 'João Silva',
-          email: 'joao.silva@example.com',
-          username: 'joao123',
-          age: 30,
-          country: 'Brasil',
-        }
-    
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(200)
-        expect(res.body.message).toBe('Usuário criado com sucesso')
-        expect(res.body.userId).toBeDefined()
-      })
-
-      it('Deve retornar 400 se o nome for invalido', async () => {
-
-        const newUser = {
-          name: 'João',
-          email: 'joao.silva@example.com',
-          username: 'joao123',
-          age: 30,
-          country: 'Brasil',
-        }
-    
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(400)
-        expect(res.body.error).toBe("Nome inválido. É necessário pelo menos dois nomes com um esspaço entre eles")
-      })
+      const newUser = {
+        name: 'João Silva',
+        email: 'joao.silva@example.com',
+        username: 'joao123',
+        age: 30,
+        country: 'Brasil',
+      }
   
-      it('Deve retornar 400 se a idade não for válida (fora do intervalo 8-120 e valor tipo number)', async () => {
-
-        const newUser = {
-          name: 'João Silva',
-          email: 'joao.silva@example.com',
-          username: 'joao123',
-          age: "32",
-          country: 'Brasil',
-        }
-    
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(400)
-        expect(res.body.error).toBe("Idade inválida. A idade deve ser um número entre 8 e 120 anos")
-      })
-      
-      it('Deve retornar 400 se o nome de usuário for inválido (menos de 6 caracteres)', async () => {
-
-        const newUser = {
-          name: 'João Silva',
-          email: 'joao.silva@example.com',
-          username: 'joa',
-          age: 30,
-          country: 'Brasil',
-        }
-    
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(400)
-        expect(res.body.error).toBe("Username inválido. Deve ser uma string com pelo menos 6 caracteres")
-      })
-    
-
-      it('Deve retornar 400 se o email não for valido', async () => {
-
-        const newUser = {
-          name: 'João Silva',
-          email: 12345, 
-          username: 'joao123',
-          age: 30,
-          country: 'Brasil',
-        }
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(400)
-        expect(res.body.error).toBe("Email inválido")
-      })
-    
- 
-      it('Deve retornar 400 se o país não for valido', async () => {
-
-        const newUser = {
-          name: 'João Silva',
-          email: 'joao.silva@example.com',
-          username: 'joao123',
-          age: 30,
-          country: 12345,  
-        }
-        const res = await request(app).post('/users').send(newUser)
-    
-        expect(res.statusCode).toEqual(400)
-        expect(res.body.error).toBe("País inválido")
-      })
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(200)
+      expect(res.body.message).toBe('Usuário criado com sucesso')
+      expect(res.body.userId).toBeDefined()
     })
+  
+    it('Deve retornar 400 se o nome for inválido', async () => {
+      const newUser = {
+        name: 'João',
+        email: 'joao.silva@example.com',
+        username: 'joao123',
+        age: 30,
+        country: 'Brasil',
+      }
+  
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(400)
+      expect(res.body.error).toBe("Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles")
+    })
+  
+    it('Deve retornar 400 se a idade não for válida (fora do intervalo 8-120 e valor tipo number)', async () => {
+      const newUser = {
+        name: 'João Silva',
+        email: 'joao.silva@example.com',
+        username: 'joao123',
+        age: "32",  
+        country: 'Brasil',
+      }
+  
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(400)
+      expect(res.body.error).toBe("Idade inválida. A idade deve ser um número entre 8 e 120 anos")
+    })
+    
+    it('Deve retornar 400 se o nome de usuário for inválido (menos de 6 caracteres)', async () => {
+      const newUser = {
+        name: 'João Silva',
+        email: 'joao.silva@example.com',
+        username: 'joa',  
+        age: 30,
+        country: 'Brasil',
+      }
+  
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(400)
+      expect(res.body.error).toBe("Username inválido. Deve ser uma string com pelo menos 6 caracteres")
+    })
+  
+    it('Deve retornar 400 se o email não for válido', async () => {
+      const newUser = {
+        name: 'João Silva',
+        email: 12345,  
+        username: 'joao123',
+        age: 30,
+        country: 'Brasil',
+      }
+      
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(400)
+      expect(res.body.error).toBe("Email inválido")
+    })
+  
+    it('Deve retornar 400 se o país não for válido', async () => {
+      const newUser = {
+        name: 'João Silva',
+        email: 'joao.silva@example.com',
+        username: 'joao123',
+        age: 30,
+        country: 12345
+      }
+  
+      const res = await request(app).post('/users').send(newUser)
+  
+      expect(res.statusCode).toEqual(400)
+      expect(res.body.error).toBe("País inválido")
+    })
+  })
+  
