@@ -15,7 +15,8 @@ db.serialize(() => {
       email TEXT,
       username TEXT,
       age INTEGER,
-      country TEXT
+      country TEXT,
+      registered_date TEXT DEFAULT (DATE('now'))
     )
   `)
 

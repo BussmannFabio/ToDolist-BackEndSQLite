@@ -114,10 +114,11 @@ const createUser = (req, res) => {
 }
 
 
+app.post('/users', validateUser, createUser)
 
 app.get('/', helloDev)
 app.get('/users', users)
-app.post('/users', validateUser, createUser)
 app.get('/users/search', checkingQuery, executeQuery)
 
+module.exports = app
 app.listen(port, '0.0.0.0', () => console.log(`Servidor rodando na porta: ${port}`))
