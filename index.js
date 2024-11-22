@@ -61,6 +61,23 @@ const executeQuery = (req, res) => {
 
 app.use(express.json())
 
+const lastUser = (req, res) => {
+  const query = `SELECT * FROM users ORDER BY id DESC LIMIT 1`
+
+  db.get(query, [], (err, row) => {
+      if (err) {
+          console.error('Erro ao buscar o último usuário:', err.message)
+          return res.status(500).json({ message: 'Erro ao buscar o último usuário' })
+      }
+
+      if (!row) {
+          return res.status(404).json({ message: 'Nenhum usuário encontrado' })
+      }
+
+      res.status(200).json(row)
+  })
+}
+
 const validateUser = (req, res, next) => {
 
   const { name, email, age, country, username } = req.body
@@ -120,5 +137,6 @@ app.post('/users', validateUser, createUser)
 app.get('/', helloDev)
 app.get('/users', users)
 app.get('/users/search', checkingQuery, executeQuery)
+app.get('/users/last', lastUser)
 
 export default app
