@@ -6,7 +6,7 @@ const port = 3005
 
 const db = new sqlite3.Database('./banco.db')
 
-const helloDev = (req, res) => res.send('Hello Dev')
+const helloDev = (req, res) => res.send({message: "Hello Dev"})
 
 const users = (req, res) => {
   db.all('SELECT * FROM users', [], (err, rows) => {
@@ -120,5 +120,4 @@ app.get('/', helloDev)
 app.get('/users', users)
 app.get('/users/search', checkingQuery, executeQuery)
 
-module.exports = app
-app.listen(port, '0.0.0.0', () => console.log(`Servidor rodando na porta: ${port}`))
+export default app
