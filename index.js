@@ -62,6 +62,7 @@ const executeQuery = (req, res) => {
 app.use(express.json())
 
 const validateUser = (req, res, next) => {
+
   const { name, email, age, country, username } = req.body
 
   if (!name || typeof name !== 'string' || !name.trim().includes(' '))
@@ -93,14 +94,13 @@ const createUser = (req, res) => {
     }
 
     const newId = row.max_id + 1
-    const registeredDate = new Date().toISOString().split('T')[0]
 
     const insertQuery = `
       INSERT INTO users (id, name, email, username, age, country, registered_date)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, DATE('now'))
     `
 
-    db.run(insertQuery, [newId, name, email, username, age, country, registeredDate], function (err) {
+    db.run(insertQuery, [newId, name, email, username, age, country], function (err) {
       if (err) {
         return res.status(500).json({ error: "Erro ao criar o usuário" })
       }
@@ -108,11 +108,11 @@ const createUser = (req, res) => {
       res.status(200).json({
         message: 'Usuário criado com sucesso',
         userId: newId,
-        registeredDate: registeredDate
       })
     })
   })
 }
+
 
 
 app.get('/', helloDev)
