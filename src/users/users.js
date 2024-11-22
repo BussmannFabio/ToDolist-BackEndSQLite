@@ -1,8 +1,7 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
 
-const app = express()
-const port = 3005
+const router = express.Router()
 
 const db = new sqlite3.Database('./banco.db')
 
@@ -58,8 +57,6 @@ const executeQuery = (req, res) => {
     res.json(rows)
   })
 }
-
-app.use(express.json())
 
 const lastUser = (req, res) => {
   const query = `SELECT * FROM users ORDER BY id DESC LIMIT 1`
@@ -132,11 +129,11 @@ const createUser = (req, res) => {
 }
 
 
-app.post('/users', validateUser, createUser)
+router.post('/', validateUser, createUser)
 
-app.get('/', helloDev)
-app.get('/users', users)
-app.get('/users/search', checkingQuery, executeQuery)
-app.get('/users/last', lastUser)
 
-export default app
+router.get('/', users)
+router.get('/search', checkingQuery, executeQuery)
+router.get('/last', lastUser)
+
+export default router

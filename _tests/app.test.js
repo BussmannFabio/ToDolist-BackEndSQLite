@@ -1,5 +1,5 @@
 import request from 'supertest'
-import app from '../index.js'
+import app from '../src/app/app.js'
 
 describe('Testando rota GET /', () => {
     it('Deve retornar "Hello Dev" na rota /', async () => {
