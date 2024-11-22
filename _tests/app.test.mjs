@@ -1,4 +1,4 @@
-import request from 'supertest'
+import supertest from 'supertest'
 import app from '../index.js'
 
 describe('Testando rotas do Express', () => {
