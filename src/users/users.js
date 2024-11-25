@@ -1,5 +1,6 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
+import crypto from 'crypto'
 
 const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
@@ -72,41 +73,49 @@ const lastUser = (req, res) => {
   })
 }
 
-const User = require('./models/User')
-
-const validateUser = async (req, res, next) => {
+const validateUser = (req, res, next) => {
   const { name, email, age, country, username } = req.body
 
-  const existingUsername = await User.findOne({ username: username })
-  const existingEmail = await User.findOne({ email: email })
+  const query = "SELECT * FROM users WHERE username = ? OR email = ?"
 
-  if (!name || typeof name !== 'string' || !name.trim().includes(' '))
-    return res.status(400).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
+  db.get(query, [username, email], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: "Erro ao verificar dados do usuário" })
+    }
 
-  if (typeof age !== 'number' || isNaN(age) || age < 8 || age > 120)
-    return res.status(400).json({ error: "Idade inválida. A idade deve ser um número entre 8 e 120 anos" })
+    if (row) {
+      if (row.username === username) {
+        return res.status(400).json({ error: "Username já cadastrado" })
+      }
+      if (row.email === email) {
+        return res.status(400).json({ error: "Email já cadastrado" })
+      }
+    }
 
-  if (!username || typeof username !== 'string' || username.length < 6)
-    return res.status(400).json({ error: "Username inválido. Deve ser uma string com pelo menos 6 caracteres" })
+    if (!name || typeof name !== 'string' || !name.trim().includes(' '))
+      return res.status(400).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
 
-  if (email && typeof email !== 'string')
-    return res.status(400).json({ error: "Email inválido" })
+    if (typeof age !== 'number' || isNaN(age) || age < 8 || age > 120)
+      return res.status(400).json({ error: "Idade inválida. A idade deve ser um número entre 8 e 120 anos" })
 
-  if (country && typeof country !== 'string')
-    return res.status(400).json({ error: "País inválido" })
+    if (!username || typeof username !== 'string' || username.length < 6)
+      return res.status(400).json({ error: "Username inválido. Deve ser uma string com pelo menos 6 caracteres" })
 
-  if (existingEmail) {
-    return res.status(400).json({ error: "Email já cadastrado" })
-  }
+    if (email && typeof email !== 'string')
+      return res.status(400).json({ error: "Email inválido" })
 
-  if (existingUsername) {
-    return res.status(400).json({ error: "Username já cadastrado" })
-  }
-  next()
+    if (country && typeof country !== 'string')
+      return res.status(400).json({ error: "País inválido" })
+
+    next()
+  })
 }
 
 const createUser = (req, res) => {
-  const { name, email, age, username, country } = req.body
+  const { name, email, age, username, country, senha } = req.body
+
+  const hashSenha = (senha) => crypto.createHash('sha256').update(senha).digest('hex')
+  const senhaHash = hashSenha(senha)
 
   const getNextIdQuery = "SELECT MAX(id) AS max_id FROM users"
 
@@ -118,11 +127,11 @@ const createUser = (req, res) => {
     const newId = (row.max_id || 0) + 1
 
     const insertQuery = `
-      INSERT INTO users (id, name, email, username, age, country, registered_date)
-      VALUES (?, ?, ?, ?, ?, ?, DATE('now'))
-    `;
+      INSERT INTO users (id, name, email, username, age, country, registered_date, senha)
+      VALUES (?, ?, ?, ?, ?, ?, DATE('now'), ?)
+    `
 
-    db.run(insertQuery, [newId, name, email, username, age, country], function (err) {
+    db.run(insertQuery, [newId, name, email, username, age, country, senhaHash], function (err) {
       if (err) {
         return res.status(500).json({ error: "Erro ao criar o usuário" })
       }

@@ -1,14 +1,7 @@
-import { db } from './geradorDB.js'
 import fs from 'fs'
-import crypto from 'crypto'
-
+import db from 'banco.db'
 
 const dados = JSON.parse(fs.readFileSync('users500.json', 'utf8'))
-
-function hashSenha(senha) {
-  return crypto.createHash('sha256').update(senha).digest('hex')
-}
-
 
 db.serialize(() => {
   const insert = db.prepare(`
@@ -17,8 +10,8 @@ db.serialize(() => {
   `)
 
   dados.users.forEach(user => {
-    const senhaHash = hashSenha(user.senha)
-    insert.run(user.id, user.name, user.email, user.username, user.age, user.country, user.registered_date || null, senhaHash)
+
+    insert.run(user.id, user.name, user.email, user.username, user.age, user.country, user.registered_date, user.senha)
   })
 
   insert.finalize(() => {
