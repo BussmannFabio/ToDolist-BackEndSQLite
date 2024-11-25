@@ -1,6 +1,6 @@
 import express from 'express'
 import usersRoutes from '../users/users.js'
-import authRoutes from '../auth.js'
+import authRoutes from '../auth/auth.js'
 
 const app = express()
 
