@@ -3,7 +3,9 @@ import usersRoutes from '../users/users.js'
 
 const app = express()
 
+
 app.use(express.json())
-app.use('/', usersRoutes)
+
+app.use('/users', usersRoutes)
 
 export default app
