@@ -14,11 +14,11 @@ const users = (req, res) => {
 const checkingQuery = (req, res, next) => {
   const { id, age, id_maiorq, id_menorq, age_maiorq, age_menorq } = req.query
 
-  if (id && id_maiorq) return res.status(400).send("Impossível buscar por: id e id_maiorq ao mesmo tempo!");
-  if (id && id_menorq) return res.status(400).send("Impossível buscar por: id e id_menorq ao mesmo tempo!");
+  if (id && id_maiorq) return res.status(400).send("Impossível buscar por: id e id_maiorq ao mesmo tempo!")
+  if (id && id_menorq) return res.status(400).send("Impossível buscar por: id e id_menorq ao mesmo tempo!")
 
-  if (age && age_maiorq) return res.status(400).send("Impossível buscar por: age e age_maiorq ao mesmo tempo!");
-  if (age && age_menorq) return res.status(400).send("Impossível buscar por: age e age_menorq ao mesmo tempo!");
+  if (age && age_maiorq) return res.status(400).send("Impossível buscar por: age e age_maiorq ao mesmo tempo!")
+  if (age && age_menorq) return res.status(400).send("Impossível buscar por: age e age_menorq ao mesmo tempo!")
 
   next()
 }
@@ -72,8 +72,13 @@ const lastUser = (req, res) => {
   })
 }
 
-const validateUser = (req, res, next) => {
-  const { name, email, age, country, username } = req.body;
+const User = require('./models/User')
+
+const validateUser = async (req, res, next) => {
+  const { name, email, age, country, username } = req.body
+
+  const existingUsername = await User.findOne({ username: username })
+  const existingEmail = await User.findOne({ email: email })
 
   if (!name || typeof name !== 'string' || !name.trim().includes(' '))
     return res.status(400).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
@@ -90,8 +95,15 @@ const validateUser = (req, res, next) => {
   if (country && typeof country !== 'string')
     return res.status(400).json({ error: "País inválido" })
 
-  next();
-};
+  if (existingEmail) {
+    return res.status(400).json({ error: "Email já cadastrado" })
+  }
+
+  if (existingUsername) {
+    return res.status(400).json({ error: "Username já cadastrado" })
+  }
+  next()
+}
 
 const createUser = (req, res) => {
   const { name, email, age, username, country } = req.body
