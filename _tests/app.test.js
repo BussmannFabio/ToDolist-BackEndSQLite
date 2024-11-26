@@ -2,16 +2,6 @@ import request from 'supertest'
 import app from '../src/app/app.js'
 
 describe('Testando rota GET /users/search', () => {
-  
-    afterEach(async () => {
-        const res = await request(app).get('/users/search')
-        if (res.body && res.body.length) {
-            // Deleta os usuários criados durante o teste
-            for (const user of res.body) {
-                await request(app).delete(`/users/${user.id}`)
-            }
-        }
-    })
 
     it('Deve retornar 200 e os resultados da busca', async () => {
         const res = await request(app).get('/users/search')
@@ -57,8 +47,8 @@ describe('Testando rota POST /users', () => {
     it('Deve retornar 200 e cadastrar o usuário', async () => {
         const newUser = {
             name: 'João Filva',
-            email: 'joao.filva' + Date.now() + '@example.com',  // Email único
-            username: 'joao' + Date.now(),  // Username único
+            email: 'joao.filva' + Date.now() + '@example.com', 
+            username: 'joao' + Date.now(),  
             age: 30,
             country: 'Brasil',
             senha: 'Brasil'
@@ -84,9 +74,9 @@ describe('Testando rota POST /users', () => {
 
     it('Deve retornar 400 se o nome for inválido', async () => {
         const newUser = {
-            name: 'João',  // Nome inválido
-            email: 'joao.filva' + Date.now() + '@example.com',  // Email único
-            username: 'joao' + Date.now(),  // Username único
+            name: 'João',  
+            email: 'joao.filva' + Date.now() + '@example.com',  
+            username: 'joao' + Date.now(),  
             age: 30,
             country: 'Brasil',
         }
@@ -100,9 +90,9 @@ describe('Testando rota POST /users', () => {
     it('Deve retornar 400 se a idade não for válida (fora do intervalo 8-120 e valor tipo number)', async () => {
         const newUser = {
             name: 'João Filva',
-            email: 'joao.filva' + Date.now() + '@example.com',  // Email único
-            username: 'joao' + Date.now(),  // Username único
-            age: "32",  // Idade como string
+            email: 'joao.filva' + Date.now() + '@example.com',  
+            username: 'joao' + Date.now(),  
+            age: "32",  
             country: 'Brasil',
         }
 
@@ -115,8 +105,8 @@ describe('Testando rota POST /users', () => {
     it('Deve retornar 400 se o nome de usuário for inválido (menos de 6 caracteres)', async () => {
         const newUser = {
             name: 'João Filva',
-            email: 'joao.filva' + Date.now() + '@example.com',  // Email único
-            username: 'joa',  // Username com menos de 6 caracteres
+            email: 'joao.filva' + Date.now() + '@example.com',  
+            username: 'joa',  
             age: 30,
             country: 'Brasil',
         }
