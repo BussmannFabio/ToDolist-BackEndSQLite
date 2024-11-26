@@ -114,8 +114,13 @@ const validateUser = (req, res, next) => {
 const createUser = (req, res) => {
   const { name, email, age, username, country, senha } = req.body
 
-  const hashSenha = (senha) => crypto.createHash('sha256').update(senha).digest('hex')
-  const senhaHash = hashSenha(senha)
+  const salt = crypto.randomBytes(16).toString('hex')
+
+  // A função crypto.pbkdf2Sync() irá pegar a senha, combiná-la com o salt, e aplicar o SHA-256 com as 10.000 iterações.
+  
+  const hashSenha = (senha, salt) => crypto.pbkdf2Sync(senha, salt, 10000, 64, 'sha256').toString('hex')
+
+  const senhaHash = hashSenha(senha, salt)
 
   const getNextIdQuery = "SELECT MAX(id) AS max_id FROM users"
 
@@ -127,11 +132,11 @@ const createUser = (req, res) => {
     const newId = (row.max_id || 0) + 1
 
     const insertQuery = `
-      INSERT INTO users (id, name, email, username, age, country, registered_date, senha)
-      VALUES (?, ?, ?, ?, ?, ?, DATE('now'), ?)
+      INSERT INTO users (id, name, email, username, age, country, registered_date, salt, senha)
+      VALUES (?, ?, ?, ?, ?, ?, DATE('now'), ?, ?)
     `
 
-    db.run(insertQuery, [newId, name, email, username, age, country, senhaHash], function (err) {
+    db.run(insertQuery, [newId, name, email, username, age, country, salt, senhaHash], function (err) {
       if (err) {
         return res.status(500).json({ error: "Erro ao criar o usuário" })
       }
@@ -143,7 +148,6 @@ const createUser = (req, res) => {
     })
   })
 }
-
 router.post('/', validateUser, createUser)
 router.get('/', users)
 router.get('/search', checkingQuery, executeQuery)
