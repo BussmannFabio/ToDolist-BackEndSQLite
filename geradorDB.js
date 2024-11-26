@@ -13,7 +13,7 @@ const criarDB = () => {
   db.serialize(() => {
     db.run(`
       CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         email TEXT,
         username TEXT,

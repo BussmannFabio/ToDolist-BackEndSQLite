@@ -1,17 +1,19 @@
+import sqlite3 from 'sqlite3'
 import fs from 'fs'
-import db from 'banco.db'
 
-const dados = JSON.parse(fs.readFileSync('users500.json', 'utf8'))
+const db = new sqlite3.Database('./banco.db')
+
+const dados = JSON.parse(fs.readFileSync('users5000.json', 'utf8'))
 
 db.serialize(() => {
+
   const insert = db.prepare(`
-    INSERT INTO users (id, name, email, username, age, country, registered_date, senha)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO users (name, email, username, age, country, senha)
+    VALUES (?, ?, ?, ?, ?, ?)
   `)
 
   dados.users.forEach(user => {
-
-    insert.run(user.id, user.name, user.email, user.username, user.age, user.country, user.registered_date, user.senha)
+    insert.run(user.name, user.email, user.username, user.age, user.country, user.senha)
   })
 
   insert.finalize(() => {
