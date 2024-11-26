@@ -76,6 +76,12 @@ const lastUser = (req, res) => {
 const validateUser = (req, res, next) => {
   const { name, email, age, country, username } = req.body
 
+  // Verifica se o email possui formato válido
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (email && !emailRegex.test(email)) {
+    return res.status(400).json({ error: "Email inválido" })
+  }
+
   const query = "SELECT * FROM users WHERE username = ? OR email = ?"
 
   db.get(query, [username, email], (err, row) => {
@@ -101,15 +107,13 @@ const validateUser = (req, res, next) => {
     if (!username || typeof username !== 'string' || username.length < 6)
       return res.status(400).json({ error: "Username inválido. Deve ser uma string com pelo menos 6 caracteres" })
 
-    if (email && typeof email !== 'string')
-      return res.status(400).json({ error: "Email inválido" })
-
     if (country && typeof country !== 'string')
       return res.status(400).json({ error: "País inválido" })
 
     next()
   })
 }
+
 
 const createUser = (req, res) => {
   const { name, email, age, username, country, senha } = req.body
