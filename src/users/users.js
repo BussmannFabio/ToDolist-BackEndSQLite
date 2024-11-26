@@ -116,8 +116,8 @@ const createUser = (req, res) => {
 
   const salt = crypto.randomBytes(16).toString('hex')
 
-  // A função crypto.pbkdf2Sync() irá pegar a senha, combiná-la com o salt, e aplicar o SHA-256 com as 10.000 iterações.
-  
+  // A função crypto.pbkdf2Sync() irá pegar a senha, combiná-la com o salt, e aplicar o SHA-256 com as 10.000 iterações. PBKDF2 (Password-Based Key Derivation Function 2)
+
   const hashSenha = (senha, salt) => crypto.pbkdf2Sync(senha, salt, 10000, 64, 'sha256').toString('hex')
 
   const senhaHash = hashSenha(senha, salt)
