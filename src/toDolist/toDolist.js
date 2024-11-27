@@ -1,38 +1,61 @@
+import express from 'express'
 import sqlite3 from 'sqlite3'
 
-const db = new sqlite3.Database('../banco.db')
+const router = express.Router()
+const db = new sqlite3.Database('./banco.db')
 
 
-db.serialize(() => {
+const validateTask = (req, res, next) => {
+  const { tarefa, status, descricao, owner } = req.body
 
-  db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='todolist';", (err, row) => {
+  if (!tarefa || typeof tarefa !== 'string' || tarefa.length < 1) {
+    return res.status(400).json({ error: "A tarefa precisa ter pelo menos um caracter" })
+  }
+
+  if (!status || !['Feito', 'Fazendo'].includes(status)) {
+    return res.status(400).json({ error: "Status inválido. Deve ser 'Feito' ou 'Fazendo'" })
+  }
+
+  if (descricao && typeof descricao !== 'string') {
+    return res.status(400).json({ error: "Descrição deve conter texto" })
+  }
+
+  if (!owner || typeof owner !== 'string' || owner.length < 3) {
+    return res.status(400).json({ error: "Owner" })
+  }
+
+  next()
+}
+
+const createTask = (req, res) => {
+  const { tarefa, status, descricao, owner } = req.body
+
+  const insertQuery = `
+    INSERT INTO todolist (tarefa, status, descricao, owner)
+    VALUES (?, ?, ?, ?)
+  `
+
+  db.run(insertQuery, [tarefa, status, descricao || '', owner], function (err) {
     if (err) {
-      console.error("Erro ao verificar tabela:", err)
-      return
+      return res.status(500).json({ error: "Erro ao criar a tarefa" })
     }
 
-    if (!row) {
-   
-      db.run(`CREATE TABLE todolist (
-        id_task INTEGER PRIMARY KEY AUTOINCREMENT,
-        tarefa TEXT NOT NULL,
-        status TEXT NOT NULL,
-        descricao TEXT,
-        owner TEXT NOT NULL
-      )`, (err) => {
-        if (err) {
-          console.error("Erro ao criar tabela:", err)
-        } else {
-          console.log("Tabela 'todolist' criada com sucesso!")
-        }
-        db.close()
-      })
-
-    } else {
-      console.log("Tabela 'todolist' já existe.")
-      db.close()
-
-    }
+    res.status(201).json({
+      message: 'Tarefa criada com sucesso',
+      taskId: this.lastID
+    })
   })
-})
+}
 
+const getTasks = (req, res) => {
+    db.all('SELECT * FROM todolist', [], (err, rows) => {
+      if (err) return res.status(500).send("Erro ao executar a consulta!")
+      res.json(rows)
+    })
+  }
+
+router.post('/', validateTask, createTask)
+
+router.get('/', getTasks) 
+
+export default router
