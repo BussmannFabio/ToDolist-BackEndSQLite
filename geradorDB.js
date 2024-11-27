@@ -10,6 +10,7 @@ const criarDB = () => {
   })
 
   db.serialize(() => {
+
     db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,13 +24,12 @@ const criarDB = () => {
       )
     `, (err) => {
       if (err) {
-        console.error("Erro ao criar a tabela:", err)
+        console.error("Erro ao criar a tabela 'users':", err)
       } else {
         console.log("Tabela 'users' criada com sucesso.")
       }
     })
 
-    // verifica se a coluna 'salt' existe
     db.all("PRAGMA table_info(users);", (err, columns) => {
       if (err) {
         console.error("Erro ao verificar colunas:", err)
@@ -47,25 +47,33 @@ const criarDB = () => {
           } else {
             console.log("Coluna 'salt' adicionada com sucesso.")
           }
-         
-          db.close((err) => {
-            if (err) {
-              console.error("Erro ao fechar o banco de dados:", err)
-            } else {
-              console.log("Banco de dados fechado com sucesso.")
-            }
-          })
         })
       } else {
         console.log("A coluna 'salt' já existe.")
-      
-        db.close((err) => {
-          if (err) {
-            console.error("Erro ao fechar o banco de dados:", err)
-          } else {
-            console.log("Banco de dados fechado com sucesso.")
-          }
-        })
+      }
+    })
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS todolist (
+        id_task INTEGER PRIMARY KEY AUTOINCREMENT,
+        tarefa TEXT NOT NULL,
+        status TEXT NOT NULL,
+        descricao TEXT,
+        owner TEXT NOT NULL
+      )
+    `, (err) => {
+      if (err) {
+        console.error("Erro ao criar a tabela 'todolist':", err)
+      } else {
+        console.log("Tabela 'todolist' criada com sucesso.")
+      }
+    })
+
+    db.close((err) => {
+      if (err) {
+        console.error("Erro ao fechar o banco de dados:", err)
+      } else {
+        console.log("Banco de dados fechado com sucesso.")
       }
     })
   })
