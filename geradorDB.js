@@ -30,26 +30,18 @@ const criarDB = () => {
       }
     })
 
-    db.all("PRAGMA table_info(users);", (err, columns) => {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS tokens (
+        email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        created_at TEXT DEFAULT (DATETIME('now')),
+        PRIMARY KEY (email)
+      )
+    `, (err) => {
       if (err) {
-        console.error("Erro ao verificar colunas:", err)
-        return db.close()
-      }
-
-      const columnNames = columns.map((col) => col.name)
-
-      if (!columnNames.includes('salt')) {
-        db.run(`
-          ALTER TABLE users ADD COLUMN salt TEXT;
-        `, (err) => {
-          if (err) {
-            console.error("Erro ao adicionar a coluna 'salt':", err)
-          } else {
-            console.log("Coluna 'salt' adicionada com sucesso.")
-          }
-        })
+        console.error("Erro ao criar a tabela 'tokens':", err.message)
       } else {
-        console.log("A coluna 'salt' já existe.")
+        console.log("Tabela 'tokens' criada com sucesso.")
       }
     })
 
@@ -63,19 +55,19 @@ const criarDB = () => {
       )
     `, (err) => {
       if (err) {
-        console.error("Erro ao criar a tabela 'todolist':", err)
+        console.error("Erro ao criar a tabela 'todolist':", err.message)
       } else {
         console.log("Tabela 'todolist' criada com sucesso.")
       }
     })
+  })
 
-    db.close((err) => {
-      if (err) {
-        console.error("Erro ao fechar o banco de dados:", err)
-      } else {
-        console.log("Banco de dados fechado com sucesso.")
-      }
-    })
+  db.close((err) => {
+    if (err) {
+      console.error("Erro ao fechar o banco de dados:", err.message)
+    } else {
+      console.log("Banco de dados fechado com sucesso.")
+    }
   })
 }
 

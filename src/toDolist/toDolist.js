@@ -1,5 +1,6 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
+import { authenticateUser  } from '../middlewares/authMiddleware.js'
 
 const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
@@ -24,12 +25,8 @@ const validateTask = (req, res, next) => {
 
 const createTask = (req, res) => {
   const { tarefa, status, descricao } = req.body
-  const owner = req.session.userEmail 
-
-  if (!owner) {
-    return res.status(401).json({ error: 'Usuário não autenticado' })
-  }
-
+  const owner = req.userEmail 
+  
   const insertQuery = `
     INSERT INTO todolist (tarefa, status, descricao, owner)
     VALUES (?, ?, ?, ?)
@@ -48,11 +45,7 @@ const createTask = (req, res) => {
 }
 
 const getTasks = (req, res) => {
-  const userEmail = req.session.userEmail
-
-  if (!userEmail) {
-    return res.status(401).json({ error: 'Usuário não autenticado' })
-  }
+  const userEmail = req.userEmail 
 
   db.all('SELECT * FROM todolist WHERE owner = ?', [userEmail], (err, rows) => {
     if (err) return res.status(500).send("Erro ao executar a consulta!")
@@ -60,7 +53,7 @@ const getTasks = (req, res) => {
   })
 }
 
-router.post('/', validateTask, createTask)
-router.get('/', getTasks)
+router.post('/', authenticateUser , validateTask, createTask)
+router.get('/', authenticateUser , getTasks)
 
 export default router

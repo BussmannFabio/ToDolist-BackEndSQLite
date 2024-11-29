@@ -4,40 +4,55 @@ import crypto from 'crypto'
 
 const router = express.Router()
 
-const loginUser = (req, res) => {
+const loginUser  = (req, res) => {
   const db = new sqlite3.Database('./banco.db')
   const { username, email, senha } = req.body
-
-  const hashSenha = (senha, salt) => crypto.pbkdf2Sync(senha, salt, 10000, 64, 'sha256').toString('hex')
 
   if (!username && !email) {
     return res.status(400).json({ error: "É necessário fornecer um email ou username" })
   }
 
   const query = "SELECT * FROM users WHERE username = ? OR email = ?"
-
   db.get(query, [username, email], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: "Erro ao verificar o usuário" })
+    if (err || !row) {
+      return res.status(err ? 500 : 404).json({ error: err ? "Erro ao verificar o usuário" : "Usuário não encontrado" })
     }
 
-    if (!row) {
-      return res.status(404).json({ error: "Usuário não encontrado" })
-    }
-
-    const senhaHash = hashSenha(senha, row.salt)
-
+    const senhaHash = crypto.pbkdf2Sync(senha, row.salt, 10000, 64, 'sha256').toString('hex')
     if (senhaHash !== row.senha) {
       return res.status(401).json({ error: "Senha incorreta" })
     }
 
-    req.session.userEmail = row.email
+    const token = crypto.randomBytes(32).toString('hex')
+    const checkTokenQuery = "SELECT * FROM tokens WHERE email = ?"
 
-    res.status(200).json({
-      message: "Login bem-sucedido",
-      email: row.email
+    db.get(checkTokenQuery, [row.email], (err, tokenRow) => {
+      if (err) {
+        return res.status(500).json({ error: "Erro ao verificar token existente" })
+      }
+
+      const queryToExecute = tokenRow
+        ? "UPDATE tokens SET token = ? WHERE email = ?"
+        : "INSERT INTO tokens (email, token) VALUES (?, ?)"
+
+      db.run(queryToExecute, [token, row.email], (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Erro ao gerar ou atualizar o token" })
+        }
+
+        res.setHeader('Set-Cookie', [
+          `token=${token}; HttpOnly; Path=/`,
+          `email=${row.email}; HttpOnly; Path=/`
+        ])
+
+        res.status(200).json({
+          message: tokenRow ? "Login bem-sucedido - Token atualizado" : "Login bem-sucedido",
+          token: token
+        })
+      })
     })
   })
 }
-router.post('/', loginUser)
+
+router.post('/', loginUser )
 export default router
