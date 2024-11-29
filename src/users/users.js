@@ -6,7 +6,12 @@ const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
 
 const users = (req, res) => {
-  db.all('SELECT * FROM users', [], (err, rows) => {
+  const userEmail = req.session.userEmail;
+  if (!userEmail) {
+    return res.status(401).json({ error: 'Usuário não autenticado' })
+  }
+
+  db.all('SELECT * FROM users WHERE email = ?', [userEmail], (err, rows) => {
     if (err) return res.status(500).send("Erro ao executar a consulta!")
     res.json(rows)
   })
@@ -76,12 +81,12 @@ const lastUser = (req, res) => {
 const validateUser = (req, res, next) => {
   const { name, email, age, country, username } = req.body
 
-  // Verifica se o email possui formato válido
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  if (email && !emailRegex.test(email)) {
-    return res.status(400).json({ error: "Email inválido" })
+  if (email) {
+    if (!email.includes('@') || email.length < 5) {
+      return res.status(400).json({ error: "Email inválido" })
+    }
   }
-
+  
   const query = "SELECT * FROM users WHERE username = ? OR email = ?"
 
   db.get(query, [username, email], (err, row) => {

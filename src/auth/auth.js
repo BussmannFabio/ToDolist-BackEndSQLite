@@ -31,8 +31,11 @@ const loginUser = (req, res) => {
       return res.status(401).json({ error: "Senha incorreta" })
     }
 
+    req.session.userEmail = row.email
+
     res.status(200).json({
-      message: "Login bem-sucedido"
+      message: "Login bem-sucedido",
+      email: row.email
     })
   })
 }
