@@ -20,11 +20,11 @@ const users = (req, res) => {
 const checkingQuery = (req, res, next) => {
   const { id, age, id_maiorq, id_menorq, age_maiorq, age_menorq } = req.query
 
-  if (id && id_maiorq) return res.status(400).send("Impossível buscar por: id e id_maiorq ao mesmo tempo!")
-  if (id && id_menorq) return res.status(400).send("Impossível buscar por: id e id_menorq ao mesmo tempo!")
+  if (id && id_maiorq) return res.status(400).json({ error: "Impossível buscar por: id e id_maiorq ao mesmo tempo!" })
+  if (id && id_menorq) return res.status(400).json({ error: "Impossível buscar por: id e id_menorq ao mesmo tempo!" })
 
-  if (age && age_maiorq) return res.status(400).send("Impossível buscar por: age e age_maiorq ao mesmo tempo!")
-  if (age && age_menorq) return res.status(400).send("Impossível buscar por: age e age_menorq ao mesmo tempo!")
+  if (age && age_maiorq) return res.status(400).json({ error: "Impossível buscar por: age e age_maiorq ao mesmo tempo!" })
+  if (age && age_menorq) return res.status(400).json({ error: "Impossível buscar por: age e age_menorq ao mesmo tempo!" })
 
   next()
 }
@@ -36,28 +36,56 @@ const executeQuery = (req, res) => {
   } = req.query
 
   let query = "SELECT * FROM users WHERE 1=1"
+  const params = []
 
-  if (id) query += ` AND id = ${parseInt(id)}`;
-  if (id_maiorq) query += ` AND id > ${parseInt(id_maiorq)}`
-  if (id_menorq) query += ` AND id < ${parseInt(id_menorq)}`
+  if (id) {
+    query += " AND id = ?"
+    params.push(parseInt(id))}
+    
+  if (id_maiorq) {
+    query += " AND id > ?"
+    params.push(parseInt(id_maiorq))}
 
-  if (name) query += ` AND name LIKE '%${name}%'`
-  if (email) query += ` AND email LIKE '%${email}%'`
-  if (username) query += ` AND username LIKE '%${username}%'`
-  if (country) query += ` AND country LIKE '%${country}%'`
+  if (id_menorq) {
+    query += " AND id < ?"
+    params.push(parseInt(id_menorq))}
 
-  if (age) query += ` AND age = ${parseInt(age)}`
-  if (age_maiorq) query += ` AND age > ${parseInt(age_maiorq)}`
-  if (age_menorq) query += ` AND age < ${parseInt(age_menorq)}`
+  if (name) {
+    query += " AND name LIKE ?"
+    params.push(`%${name}%`)}
+
+  if (email) {
+    query += " AND email LIKE ?"
+    params.push(`%${email}%`)}
+
+  if (username) {
+    query += " AND username LIKE ?"
+    params.push(`%${username}%`)}
+
+  if (country) {
+    query += " AND country LIKE ?"
+    params.push(`%${country}%`) }
+
+  if (age) {
+    query += " AND age = ?"
+    params.push(parseInt(age))}
+
+  if (age_maiorq) {
+    query += " AND age > ?"
+    params.push(parseInt(age_maiorq))}
+
+  if (age_menorq) {
+    query += " AND age < ?" 
+    params.push(parseInt(age_menorq))}
 
   query += ` ORDER BY ${sortBy} ${order.toUpperCase()}`
-
   const offset = (page - 1) * limite
-  query += ` LIMIT ${limite} OFFSET ${offset}`
+  query += " LIMIT ? OFFSET ?"
+  params.push(limite, offset)
 
-  db.all(query, (err, rows) => {
-    if (err) return res.status(500).send("Erro ao executar a consulta!")
-    res.json(rows);
+  db.all(query, params, (err, rows) => {
+    if (err) return res.status(500).json({ error: "Erro ao executar a consulta!" })
+    res.json(rows)
   })
 }
 
