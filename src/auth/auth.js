@@ -3,9 +3,9 @@ import sqlite3 from 'sqlite3'
 import crypto from 'crypto'
 
 const router = express.Router()
+const db = new sqlite3.Database('./banco.db')
 
-const loginUser  = (req, res) => {
-  const db = new sqlite3.Database('./banco.db')
+const loginUser = (req, res) => {
   const { username, email, senha } = req.body
 
   if (!username && !email) {
@@ -39,20 +39,20 @@ const loginUser  = (req, res) => {
         if (err) {
           return res.status(500).json({ error: "Erro ao gerar ou atualizar o token" })
         }
-
         res.setHeader('Set-Cookie', [
-          `token=${token}; HttpOnly; Path=/`,
-          `email=${row.email}; HttpOnly; Path=/`
+          `token=${token}; HttpOnly; Path=/; Max-Age=3600`,  // 1 hora
+          `email=${row.email}; HttpOnly; Path=/; Max-Age=3600`  // 1 hora
         ])
-
         res.status(200).json({
           message: tokenRow ? "Login bem-sucedido - Token atualizado" : "Login bem-sucedido",
-          token: token
+          token: token,
+          email: row.email
         })
       })
     })
   })
 }
 
-router.post('/', loginUser )
+router.post('/', loginUser)
+
 export default router

@@ -1,6 +1,6 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
-import { authenticateUser  } from '../middlewares/authMiddleware.js'
+import { authenticateUser } from '../middlewares/authMiddleware.js'
 
 const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
@@ -53,7 +53,39 @@ const getTasks = (req, res) => {
   })
 }
 
+const deleteTask = (req, res) => {
+  const { taskId } = req.body 
+  const owner = req.userEmail
+
+  db.run("DELETE FROM todolist WHERE id = ? AND owner = ?", [taskId, owner], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Erro ao deletar a tarefa" })
+    }
+    res.status(200).json({ message: "Tarefa removida com sucesso" })
+  })
+}
+
+const updateTask = (req, res) => {
+  const { taskId, tarefa, descricao, status } = req.body
+  const owner = req.userEmail 
+
+  const updateQuery = `
+      UPDATE todolist
+      SET tarefa = ?, descricao = ?, status = ?
+      WHERE id = ? AND owner = ?
+  `
+
+  db.run(updateQuery, [tarefa, descricao, status, taskId, owner], function (err) {
+      if (err) {
+          return res.status(500).json({ error: "Erro ao atualizar a tarefa" })
+      }
+      res.status(200).json({ message: "Tarefa atualizada com sucesso" })
+  })
+}
+
 router.post('/', authenticateUser , validateTask, createTask)
 router.get('/', authenticateUser , getTasks)
+router.delete('/:taskId', authenticateUser, deleteTask)
+router.put('/:taskId', authenticateUser, updateTask)
 
 export default router
