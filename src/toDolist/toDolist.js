@@ -73,22 +73,41 @@ const deleteTask = (req, res) => {
 
 
 const updateTask = (req, res) => {
-  const { taskId, tarefa, descricao, status } = req.body
+  const { taskId } = req.params
+  const { tarefa, descricao, status } = req.body
   const owner = req.userEmail 
 
+  if (!tarefa || typeof tarefa !== 'string' || tarefa.length < 1) {
+    return res.status(400).json({ error: "A tarefa precisa ter pelo menos um caracter" })
+  }
+
+  if (!status || !['Feito', 'Fazendo'].includes(status)) {
+    return res.status(400).json({ error: "Status inválido. Deve ser 'Feito' ou 'Fazendo'" })
+  }
+
+  console.log('Dados recebidos:', { taskId, tarefa, descricao, status, owner })
+
   const updateQuery = `
-      UPDATE todolist
-      SET tarefa = ?, descricao = ?, status = ?
-      WHERE id = ? AND owner = ?
+    UPDATE todolist
+    SET tarefa = ?, descricao = ?, status = ?
+    WHERE id_task = ? AND owner = ?
   `
 
-  db.run(updateQuery, [tarefa, descricao, status, taskId, owner], function (err) {
-      if (err) {
-          return res.status(500).json({ error: "Erro ao atualizar a tarefa" })
-      }
-      res.status(200).json({ message: "Tarefa atualizada com sucesso" })
+  db.run(updateQuery, [tarefa, descricao || '', status, taskId, owner], function (err) {
+    if (err) {
+      console.error("Erro ao atualizar a tarefa:", err)
+      return res.status(500).json({ error: "Erro ao atualizar a tarefa" })
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Tarefa não encontrada ou não pertence ao usuário" })
+    }
+
+    res.status(200).json({ message: "Tarefa atualizada com sucesso" })
   })
 }
+
+
 
 router.post('/', authenticateUser , validateTask, createTask)
 router.get('/', authenticateUser , getTasks)
