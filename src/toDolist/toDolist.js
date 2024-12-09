@@ -54,16 +54,23 @@ const getTasks = (req, res) => {
 }
 
 const deleteTask = (req, res) => {
-  const { taskId } = req.body 
-  const owner = req.userEmail
+  const { taskId } = req.params 
+  const owner = req.userEmail  
+  const deleteQuery = "DELETE FROM todolist WHERE id_task = ? AND owner = ?"
 
-  db.run("DELETE FROM todolist WHERE id = ? AND owner = ?", [taskId, owner], function (err) {
+  db.run(deleteQuery, [taskId, owner], function (err) {
     if (err) {
+      console.error("Erro ao deletar a tarefa:", err)
       return res.status(500).json({ error: "Erro ao deletar a tarefa" })
+    }
+    if (this.changes === 0) {
+    
+      return res.status(404).json({ error: "Tarefa não encontrada ou não pertence ao usuário" })
     }
     res.status(200).json({ message: "Tarefa removida com sucesso" })
   })
 }
+
 
 const updateTask = (req, res) => {
   const { taskId, tarefa, descricao, status } = req.body
