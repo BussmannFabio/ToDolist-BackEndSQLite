@@ -12,10 +12,6 @@ const validateTask = (req, res, next) => {
     return res.status(400).json({ error: "A tarefa precisa ter pelo menos um caracter" })
   }
 
-  if (!status || !['Feito', 'Fazendo'].includes(status)) {
-    return res.status(400).json({ error: "Status inválido. Deve ser 'Feito' ou 'Fazendo'" })
-  }
-
   if (descricao && typeof descricao !== 'string') {
     return res.status(400).json({ error: "Descrição deve conter texto" })
   }
@@ -81,10 +77,6 @@ const updateTask = (req, res) => {
     return res.status(400).json({ error: "A tarefa precisa ter pelo menos um caracter" })
   }
 
-  if (!status || !['Feito', 'Fazendo'].includes(status)) {
-    return res.status(400).json({ error: "Status inválido. Deve ser 'Feito' ou 'Fazendo'" })
-  }
-
   console.log('Dados recebidos:', { taskId, tarefa, descricao, status, owner })
 
   const updateQuery = `
@@ -99,14 +91,9 @@ const updateTask = (req, res) => {
       return res.status(500).json({ error: "Erro ao atualizar a tarefa" })
     }
 
-    if (this.changes === 0) {
-      return res.status(404).json({ error: "Tarefa não encontrada ou não pertence ao usuário" })
-    }
-
     res.status(200).json({ message: "Tarefa atualizada com sucesso" })
   })
 }
-
 
 
 router.post('/', authenticateUser , validateTask, createTask)

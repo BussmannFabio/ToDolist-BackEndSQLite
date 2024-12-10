@@ -1,7 +1,7 @@
 import express from 'express'
 import sqlite3 from 'sqlite3'
 import crypto from 'crypto'
-
+  
 const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
 

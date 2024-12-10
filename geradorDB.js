@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3'
 
+
 const criarDB = () => {
   const db = new sqlite3.Database('./banco.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {

@@ -1,4 +1,4 @@
-import request from 'supertest'
+import request from 'supertest'  
 import app from '../src/app/app.js'
 
 describe('Testando rota GET /users/search', () => {
