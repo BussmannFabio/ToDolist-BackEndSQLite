@@ -11,7 +11,7 @@ const authenticateUser = (req, res, next) => {
     return res.status(401).json({ error: 'Token ou email não fornecido' })
   }
 
-  // verificar se o token é válido para o email fornecido
+  // Verificar se o token é válido para o email fornecido
   const query = "SELECT * FROM tokens WHERE email = ? AND token = ?"
   
   db.get(query, [email, token], (err, row) => {
@@ -19,7 +19,7 @@ const authenticateUser = (req, res, next) => {
       return res.status(401).json({ error: 'Token inválido ou expirado' })
     }
 
-    // se o token for válido, passamos o email do usuário para a requisição
+    // Se o token for válido, passamos o email do usuário para a requisição
     req.userEmail = row.email 
     next() 
   })

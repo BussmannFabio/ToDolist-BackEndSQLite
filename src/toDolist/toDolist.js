@@ -95,9 +95,8 @@ const updateTask = (req, res) => {
   })
 }
 
-
-router.post('/', authenticateUser , validateTask, createTask)
 router.get('/', authenticateUser , getTasks)
+router.post('/', authenticateUser , validateTask, createTask)
 router.delete('/:taskId', authenticateUser, deleteTask)
 router.put('/:taskId', authenticateUser, updateTask)
 

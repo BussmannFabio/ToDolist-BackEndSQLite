@@ -5,7 +5,7 @@ import crypto from 'crypto'
 const router = express.Router()
 const db = new sqlite3.Database('./banco.db')
 
-const loginUser = (req, res) => {
+const loginUser  = (req, res) => {
   const { username, email, senha } = req.body
 
   if (!username && !email) {
@@ -31,18 +31,25 @@ const loginUser = (req, res) => {
         return res.status(500).json({ error: "Erro ao verificar token existente" })
       }
 
-      const queryToExecute = tokenRow
-        ? "UPDATE tokens SET token = ? WHERE email = ?"
+      console.log("Preparando para salvar token:")
+      console.log("Email:", row.email)
+      console.log("Token:", token)
+
+      const queryToExecute = tokenRow 
+        ? "UPDATE tokens SET token = ? WHERE email = ?" 
         : "INSERT INTO tokens (email, token) VALUES (?, ?)"
 
-      db.run(queryToExecute, [token, row.email], (err) => {
+      db.run(queryToExecute, tokenRow ? [token, row.email] : [row.email, token], (err) => {
         if (err) {
           return res.status(500).json({ error: "Erro ao gerar ou atualizar o token" })
         }
-        res.setHeader('Set-Cookie', [
-          `token=${token}; HttpOnly; Path=/; Max-Age=3600`,  // 1 hora
-          `email=${row.email}; HttpOnly; Path=/; Max-Age=3600`  // 1 hora
-        ])
+
+        console.log("Resposta de login:", {
+          message: tokenRow ? "Login bem-sucedido - Token atualizado" : "Login bem-sucedido",
+          token: token,
+          email: row.email
+        })
+
         res.status(200).json({
           message: tokenRow ? "Login bem-sucedido - Token atualizado" : "Login bem-sucedido",
           token: token,

@@ -106,7 +106,7 @@ const validateUser = (req, res, next) => {
     if (!name || typeof name !== 'string' || !name.trim().includes(' '))
       return res.status(400).json({ error: "Nome inválido. É necessário pelo menos dois nomes com um espaço entre eles" })
 
-    if (typeof age !== 'number' || isNaN(age) || age < 8 || age > 120)
+    if (isNaN(age) || age < 8 || age > 120)
       return res.status(400).json({ error: "Idade inválida. A idade deve ser um número entre 8 e 120 anos" })
 
     if (!username || typeof username !== 'string' || username.length < 6)
