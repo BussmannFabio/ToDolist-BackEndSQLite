@@ -1,18 +1,21 @@
-{
+{  
   "name": "banco.db",
   "version": "1.0.0",
   "description": "users",
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "jquery": "^3.7.1",
     "sqlite3": "^5.1.7"
   },
   "repository": {
